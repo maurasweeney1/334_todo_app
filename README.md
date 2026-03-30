@@ -34,6 +34,7 @@ Every push must pass all three steps before the code is accepted.
 ## How to Contribute
 1. Pull the latest code: git pull origin main
 2. Make your changes
-3. Commit: git commit -m "describe what you did"
-4. Push: git push origin main
-5. Check GitHub Actions to confirm CI passed
+3. Stage your changes: git add .
+4. Commit: git commit -m "describe what you did"
+5. Push: git push origin main
+6. Check GitHub Actions to confirm CI passed
