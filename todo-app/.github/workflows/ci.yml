@@ -1,0 +1,39 @@
+# Name of the CI pipeline
+name: CI Pipeline
+
+# Trigger: automatically run this pipeline every time anyone pushes code
+on: [push]
+
+jobs:
+  # Define a job called "build"
+  # A job is a set of steps that run together on the same machine
+  build:
+    # Use GitHub's server running the latest version of Ubuntu Linux
+    # This ensures everyone's code is tested in the same environment
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Download our code onto GitHub's server
+      - uses: actions/checkout@v3
+
+      # Step 2: Install Python 3.11 on GitHub's server
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      # Step 3: Install all required packages listed in requirements.txt (flask, pytest)
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      # Step 4: Run all unit tests in test_unit.py
+      # Unit tests check each database function individually and in isolation
+      - name: Run Unit Tests
+        run: pytest tests/test_unit.py -v
+
+      # Step 5: INTEGRATION TEST stage
+      # Run all integration tests in test_integration.py
+      # Integration tests check that the Flask API endpoints work correctly
+      - name: Run Integration Tests
+        run: pytest tests/test_integration.py -v
+ # If any test fails, the pipeline reports failure and the team is notified
