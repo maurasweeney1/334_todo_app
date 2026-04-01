@@ -24,7 +24,7 @@ jobs:
 
       # Step 3: Install all required packages listed in requirements.txt (flask, pytest)
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: pip install -r todo-app/requirements.txt
 
       # Step 4: Run all unit tests in test_unit.py
       # Unit tests check each database function individually and in isolation
