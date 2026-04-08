@@ -28,7 +28,7 @@ def test_add_todo():
     conn.close()
 
 def test_get_all_todos():
-    # Use a temporary test database, not the real one
+    # Use a temporary test database, not the real onegit add tests/test_unit.py
     conn = sqlite3.connect(':memory:')
     cursor = conn.cursor()
     cursor.execute('''
