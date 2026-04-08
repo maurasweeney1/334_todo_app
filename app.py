@@ -1,5 +1,5 @@
 import sqlite3
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from database import init_db, add_todo, get_all_todos
 
 # Initialize Flask app
@@ -7,6 +7,11 @@ app = Flask(__name__)
 
 # Initialize the database when the app starts
 init_db()
+
+# GET / - Serve the frontend
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 # GET /todos - Return all todo tasks
 @app.route('/todos', methods=['GET'])
