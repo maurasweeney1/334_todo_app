@@ -54,4 +54,31 @@ def test_get_all_todos():
     assert todos[0][1] == 'Buy groceries'
     assert todos[1][1] == 'Do homework'
     conn.close()
+
     
+def test_delete_todo():
+    # Use a temporary test database, not the real one
+    conn = sqlite3.connect(':memory:')
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE todos(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            done INTEGER NOT NULL DEFAULT 0
+        )
+    ''')
+    conn.commit()
+    
+    # Insert a task to delete
+    cursor.execute('INSERT INTO todos (title, done) VALUES (?, 0)', ('Buy groceries',))
+    conn.commit()
+    
+    # Delete the task
+    cursor.execute('DELETE FROM todos WHERE id = 1')
+    conn.commit()
+    
+    # Verify the task was deleted
+    cursor.execute('SELECT * FROM todos')
+    todos = cursor.fetchall()
+    assert len(todos) == 0
+    conn.close()
