@@ -33,6 +33,14 @@ def get_all_todos():
     # Return the list of all tasks
     return todos
 
-# Delete a todo task 
+# Delete a todo task
+def delete_todo(todo_id):
+    conn = sqlite3.connect('todos.db')
+    cursor = conn.cursor()
+    cursor.execute('DELETE FROM todos WHERE id = ?', (todo_id,))
+    conn.commit()
+    deleted = cursor.rowcount
+    conn.close()
+    return deleted
 
 # Mark as complete/incomplete

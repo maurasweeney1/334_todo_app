@@ -19,6 +19,15 @@ function App() {
       .catch(err => setError(err.message))
   }
 
+  function deleteTodo(id) {
+    fetch(`/todos/${id}`, { method: 'DELETE' })
+      .then(res => {
+        if (!res.ok) throw new Error(`DELETE /todos/${id} failed: ${res.status}`)
+        fetchTodos()
+      })
+      .catch(err => setError(err.message))
+  }
+
   function addTodo(e) {
     e.preventDefault()
     if (!newTitle.trim()) return
@@ -64,11 +73,20 @@ function App() {
             style={{
               padding: '10px 12px',
               borderBottom: '1px solid #eee',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
               textDecoration: todo.done ? 'line-through' : 'none',
               color: todo.done ? '#aaa' : '#000'
             }}
           >
             {todo.title}
+            <button
+              onClick={() => deleteTodo(todo.id)}
+              style={{ marginLeft: 12, padding: '4px 10px', cursor: 'pointer', color: 'red', background: 'none', border: '1px solid red', borderRadius: 4 }}
+            >
+              Delete
+            </button>
           </li>
         ))}
       </ul>

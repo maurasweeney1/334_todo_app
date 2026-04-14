@@ -54,7 +54,6 @@ def test_get_all_todos():
     assert todos[0][1] == 'Buy groceries'
     assert todos[1][1] == 'Do homework'
     conn.close()
-
     
 def test_delete_todo():
     # Use a temporary test database, not the real one

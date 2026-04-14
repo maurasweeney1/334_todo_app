@@ -1,6 +1,6 @@
 import sqlite3
 from flask import Flask, request, jsonify, render_template
-from database import init_db, add_todo, get_all_todos
+from database import init_db, add_todo, get_all_todos, delete_todo
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -37,6 +37,12 @@ def create_todo():
     return jsonify({'message': 'Todo created successfully'}), 201
 
 # DELETE /todos/<id> - Delete a todo task
+@app.route('/todos/<int:todo_id>', methods=['DELETE'])
+def delete_todo_route(todo_id):
+    deleted = delete_todo(todo_id)
+    if deleted == 0:
+        return jsonify({'error': 'Todo not found'}), 404
+    return jsonify({'message': 'Todo deleted successfully'}), 200
 
 # PUT /todos/<id> - Mark a todo task as done
 
