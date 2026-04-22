@@ -81,3 +81,34 @@ def test_delete_todo():
     todos = cursor.fetchall()
     assert len(todos) == 0
     conn.close()
+
+def test_toggle_todo():
+    # Use a temporary test database, not the real one
+    conn = sqlite3.connect(':memory:')
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE todos(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            done INTEGER NOT NULL DEFAULT 0
+        )
+    ''')
+    conn.commit()
+
+    # Insert a task with done = 0
+    cursor.execute('INSERT INTO todos (title, done) VALUES (?, 0)', ('Buy groceries',))
+    conn.commit()
+
+    # Toggle done: 0 -> 1
+    cursor.execute('UPDATE todos SET done = 1 - done WHERE id = 1')
+    conn.commit()
+    cursor.execute('SELECT done FROM todos WHERE id = 1')
+    assert cursor.fetchone()[0] == 1
+
+    # Toggle done: 1 -> 0
+    cursor.execute('UPDATE todos SET done = 1 - done WHERE id = 1')
+    conn.commit()
+    cursor.execute('SELECT done FROM todos WHERE id = 1')
+    assert cursor.fetchone()[0] == 0
+
+    conn.close()
