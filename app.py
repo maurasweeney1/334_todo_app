@@ -1,6 +1,6 @@
 import sqlite3
 from flask import Flask, request, jsonify, render_template
-from database import init_db, add_todo, get_all_todos, delete_todo
+from database import init_db, add_todo, get_all_todos, delete_todo, toggle_todo
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -16,7 +16,8 @@ def index():
 # GET /todos - Return all todo tasks
 @app.route('/todos', methods=['GET'])
 def get_todos():
-    todos = get_all_todos()
+    date = request.args.get('date', '')
+    todos = get_all_todos(date)
     # Convert list of tuples to list of dictionaries
     result = []
     for todo in todos:
@@ -33,7 +34,8 @@ def create_todo():
     # Get the title from the request body
     data = request.get_json()
     title = data['title']
-    add_todo(title)
+    date = data.get('date', '')
+    add_todo(title, date)
     return jsonify({'message': 'Todo created successfully'}), 201
 
 # DELETE /todos/<id> - Delete a todo task
@@ -44,7 +46,13 @@ def delete_todo_route(todo_id):
         return jsonify({'error': 'Todo not found'}), 404
     return jsonify({'message': 'Todo deleted successfully'}), 200
 
-# PUT /todos/<id> - Mark a todo task as done
+# PUT /todos/<id> - Toggle a todo task done/undone
+@app.route('/todos/<int:todo_id>', methods=['PUT'])
+def toggle_todo_route(todo_id):
+    updated = toggle_todo(todo_id)
+    if updated == 0:
+        return jsonify({'error': 'Todo not found'}), 404
+    return jsonify({'message': 'Todo updated successfully'}), 200
 
 # Run the app
 if __name__ == '__main__':
