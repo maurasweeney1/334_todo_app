@@ -56,4 +56,4 @@ def toggle_todo(todo_id):
     conn.commit()
     updated = cursor.rowcount
     conn.close()
-    return updated
+    return updated 
