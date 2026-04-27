@@ -36,3 +36,13 @@ def get_all_todos():
 # Delete a todo task 
 
 # Mark as complete/incomplete
+
+# Clear all completed todo tasks for a given date
+def clear_completed(date):
+    conn = sqlite3.connect('todos.db')
+    cursor = conn.cursor()
+    cursor.execute('DELETE FROM todos WHERE done = 1 AND date = ?', (date,))
+    conn.commit()
+    deleted = cursor.rowcount
+    conn.close()
+    return deleted

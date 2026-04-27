@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Todo App</title>
+  <style>
+    :root {
+      --color-background-primary: #ffffff;
+      --color-background-secondary: #f7f7f7;
+      --color-text-primary: #1a1a1a;
+      --color-text-secondary: #666666;
+      --color-text-tertiary: #aaaaaa;
+      --color-border-tertiary: #e5e5e5;
+      --color-border-secondary: #cccccc;
+      --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      background: #ececec;
+      font-family: var(--font-sans);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 16px;
+    }
+    .app {
+      background: var(--color-background-primary);
+      border: 0.5px solid var(--color-border-tertiary);
+      border-radius: 14px;
+      overflow: hidden;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      padding: 28px;
+    }
+    .todo-title { font-size: 22px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 4px; }
+    .todo-meta {
+      display: flex; align-items: center;
+      justify-content: space-between; margin-bottom: 18px;
+    }
+    .todo-date-text { font-size: 13px; color: var(--color-text-secondary); }
+    .remaining { font-size: 13px; color: var(--color-text-secondary); }
+    .add-row { display: flex; gap: 8px; margin-bottom: 18px; }
+    .add-input {
+      flex: 1; height: 38px;
+      border: 0.5px solid var(--color-border-secondary);
+      border-radius: 10px; padding: 0 12px; font-size: 14px;
+      color: var(--color-text-primary);
+      background: var(--color-background-primary); outline: none;
+    }
+    .add-input:focus { border-color: #D85A30; }
+    .add-btn {
+      width: 38px; height: 38px; border-radius: 10px;
+      background: #D85A30; border: none; cursor: pointer;
+      color: white; font-size: 22px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .add-btn:hover { background: #993C1D; }
+    .task-list { display: flex; flex-direction: column; gap: 7px; }
+    .task-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 13px;
+      border: 0.5px solid var(--color-border-tertiary);
+      border-radius: 10px; transition: background 0.1s;
+    }
+    .task-item:hover { background: var(--color-background-secondary); }
+    .task-check {
+      width: 20px; height: 20px; border-radius: 50%;
+      border: 1.5px solid var(--color-border-secondary);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: all 0.15s; cursor: pointer;
+    }
+    .task-check.done { background: #D85A30; border-color: #D85A30; }
+    .check-mark { color: white; font-size: 11px; display: none; }
+    .task-check.done .check-mark { display: block; }
+    .task-text { font-size: 14px; color: var(--color-text-primary); flex: 1; }
+    .task-text.done { text-decoration: line-through; color: var(--color-text-tertiary); }
+    .del-btn {
+      background: none; border: none; cursor: pointer;
+      color: var(--color-text-tertiary); font-size: 18px;
+      line-height: 1; padding: 0 2px; border-radius: 4px; flex-shrink: 0;
+    }
+    .del-btn:hover { color: #D85A30; }
+    .empty-state {
+      text-align: center; padding: 40px 0;
+      color: var(--color-text-tertiary); font-size: 14px;
+    }
+    .clear-btn {
+      margin-top: 14px; width: 100%; height: 36px;
+      border: 0.5px solid var(--color-border-secondary);
+      border-radius: 10px; background: none; cursor: pointer;
+      font-size: 13px; color: var(--color-text-secondary);
+    }
+    .clear-btn:hover { background: #fee2e2; color: #b91c1c; border-color: #fca5a5; }
+    .error-bar {
+      background: #fee; color: #c00;
+      border: 1px solid #fcc; border-radius: 8px;
+      padding: 8px 12px; font-size: 13px; margin-bottom: 12px;
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <div class="todo-title">My Tasks</div>
+  <div class="todo-meta">
+    <input type="date" id="date-picker" class="todo-date-text" onchange="fetchTodos()" style="border:none;background:none;font-size:13px;color:var(--color-text-secondary);cursor:pointer;outline:none">
+    <span class="remaining" id="remaining"></span>
+  </div>
+  <div id="error-bar" class="error-bar" style="display:none"></div>
+  <div class="add-row">
+    <input class="add-input" id="add-input" type="text" placeholder="Add a new task..."
+           onkeydown="if(event.key==='Enter') addTask()">
+    <button class="add-btn" onclick="addTask()">+</button>
+  </div>
+  <div class="task-list" id="task-list"></div>
+  <button class="clear-btn" onclick="clearCompleted()">Clear Completed</button>
+</div>
+
+<script>
+  let allTodos = [];
+
+  const todayStr = new Date().toISOString().slice(0, 10);
+  document.getElementById('date-picker').value = todayStr;
+
+  function selectedDate() { return document.getElementById('date-picker').value; }
+
+  function showError(msg) {
+    const bar = document.getElementById('error-bar');
+    bar.textContent = msg;
+    bar.style.display = 'block';
+    setTimeout(() => { bar.style.display = 'none'; }, 4000);
+  }
+
+  async function fetchTodos() {
+    try {
+      const res = await fetch('/todos?date=' + selectedDate());
+      if (!res.ok) throw new Error('GET /todos failed: ' + res.status);
+      allTodos = await res.json();
+      renderTasks();
+    } catch (e) {
+      showError(e.message);
+    }
+  }
+
+  async function addTask() {
+    const inp = document.getElementById('add-input');
+    const text = inp.value.trim();
+    if (!text) return;
+    try {
+      const res = await fetch('/todos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: text, date: selectedDate() })
+      });
+      if (!res.ok) throw new Error('POST /todos failed: ' + res.status);
+      inp.value = '';
+      await fetchTodos();
+    } catch (e) {
+      showError(e.message);
+    }
+  }
+
+  async function toggleTask(id) {
+    try {
+      const res = await fetch('/todos/' + id, { method: 'PUT' });
+      if (!res.ok) throw new Error('PUT /todos/' + id + ' failed: ' + res.status);
+      await fetchTodos();
+    } catch (e) {
+      showError(e.message);
+    }
+  }
+
+  async function deleteTask(id, event) {
+    event.stopPropagation();
+    try {
+      const res = await fetch('/todos/' + id, { method: 'DELETE' });
+      if (!res.ok) throw new Error('DELETE /todos/' + id + ' failed: ' + res.status);
+      await fetchTodos();
+    } catch (e) {
+      showError(e.message);
+    }
+  }
+
+  function escHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function renderTasks() {
+    const rem = allTodos.filter(t => !t.done).length;
+    document.getElementById('remaining').textContent = rem ? rem + ' remaining' : (allTodos.length ? '' : '');
+
+    const el = document.getElementById('task-list');
+    el.innerHTML = '';
+    if (!allTodos.length) {
+      el.innerHTML = '<div class="empty-state">No tasks yet.</div>';
+      return;
+    }
+    allTodos.forEach(t => {
+      const item = document.createElement('div');
+      item.className = 'task-item';
+      item.innerHTML =
+        '<div class="task-check ' + (t.done ? 'done' : '') + '" onclick="toggleTask(' + t.id + ')">' +
+          '<span class="check-mark">&#10003;</span>' +
+        '</div>' +
+        '<span class="task-text ' + (t.done ? 'done' : '') + '">' + escHtml(t.title) + '</span>' +
+        '<button class="del-btn" onclick="deleteTask(' + t.id + ', event)" title="Delete">&#215;</button>';
+      el.appendChild(item);
+    });
+  }
+
+  async function clearCompleted() {
+    try {
+      const res = await fetch("/todos/completed?date=" + selectedDate(), { method: "DELETE" });
+      if (!res.ok) throw new Error("DELETE /todos/completed failed: " + res.status);
+      await fetchTodos();
+    } catch (e) {
+      showError(e.message);
+    }
+  }
+
+  fetchTodos();
+</script>
+</body>
+</html>
