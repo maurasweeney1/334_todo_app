@@ -54,6 +54,13 @@ def toggle_todo_route(todo_id):
         return jsonify({'error': 'Todo not found'}), 404
     return jsonify({'message': 'Todo updated successfully'}), 200
 
+# DELETE /todos/completed - Clear all completed tasks for a given date
+@app.route('/todos/completed', methods=['DELETE'])
+def clear_completed_route():
+    date = request.args.get('date', '')
+    deleted = clear_completed(date)
+    return jsonify({'message': f'{deleted} completed task(s) cleared'}), 200
+
 # Run the app
 if __name__ == '__main__':
     app.run(debug=True, port=5001)

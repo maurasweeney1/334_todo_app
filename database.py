@@ -49,11 +49,13 @@ def delete_todo(todo_id):
     return deleted
 
 # Mark as complete/incomplete
-def toggle_todo(todo_id):
+
+# Clear all completed todo tasks for a given date
+def clear_completed(date):
     conn = sqlite3.connect('todos.db')
     cursor = conn.cursor()
-    cursor.execute('UPDATE todos SET done = 1 - done WHERE id = ?', (todo_id,))
+    cursor.execute('DELETE FROM todos WHERE done = 1 AND date = ?', (date,))
     conn.commit()
-    updated = cursor.rowcount
+    deleted = cursor.rowcount
     conn.close()
-    return updated 
+    return deleted

@@ -87,6 +87,13 @@
       text-align: center; padding: 40px 0;
       color: var(--color-text-tertiary); font-size: 14px;
     }
+    .clear-btn {
+      margin-top: 14px; width: 100%; height: 36px;
+      border: 0.5px solid var(--color-border-secondary);
+      border-radius: 10px; background: none; cursor: pointer;
+      font-size: 13px; color: var(--color-text-secondary);
+    }
+    .clear-btn:hover { background: #fee2e2; color: #b91c1c; border-color: #fca5a5; }
     .error-bar {
       background: #fee; color: #c00;
       border: 1px solid #fcc; border-radius: 8px;
@@ -108,6 +115,7 @@
     <button class="add-btn" onclick="addTask()">+</button>
   </div>
   <div class="task-list" id="task-list"></div>
+  <button class="clear-btn" onclick="clearCompleted()">Clear Completed</button>
 </div>
 
 <script>
@@ -200,6 +208,16 @@
         '<button class="del-btn" onclick="deleteTask(' + t.id + ', event)" title="Delete">&#215;</button>';
       el.appendChild(item);
     });
+  }
+
+  async function clearCompleted() {
+    try {
+      const res = await fetch("/todos/completed?date=" + selectedDate(), { method: "DELETE" });
+      if (!res.ok) throw new Error("DELETE /todos/completed failed: " + res.status);
+      await fetchTodos();
+    } catch (e) {
+      showError(e.message);
+    }
   }
 
   fetchTodos();
