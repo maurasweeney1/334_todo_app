@@ -47,6 +47,7 @@ function App() {
   return (
     <div style={{ maxWidth: 500, margin: '40px auto', fontFamily: 'sans-serif' }}>
       <h1>Todo App</h1>
+      <p>Welcome to our To Do App!</p>
 
       {error && (
         <p style={{ color: 'red', background: '#fee', padding: 8, borderRadius: 4 }}>
