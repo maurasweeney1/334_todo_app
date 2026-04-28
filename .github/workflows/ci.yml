@@ -20,20 +20,28 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
-      # Step 3: Install all required packages listed in requirements.txt (flask, pytest)
+      # Step 3: Install all required packages listed in requirements.txt (flask, pytest, flake8)
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      # Step 4: Run all unit tests in test_unit.py
+      # Step 4: Lint with flake8: fail build on any style violation
+      - name: Lint (flake8)
+        run: flake8 .
+
+      # Step 5: Run all unit tests in test_unit.py
       # Unit tests check each database function individually and in isolation
       - name: Run Unit Tests
         run: pytest tests/test_unit.py -v
 
-      # Step 5: INTEGRATION TEST stage
+      # Step 6: INTEGRATION TEST stage
       # Run all integration tests in test_integration.py
       # Integration tests check that the Flask API endpoints work correctly
       - name: Run Integration Tests
         run: pytest tests/test_integration.py -v
- # If any test fails, the pipeline reports failure and the team is notified
+
+      # Step 7: Coverage - report untested lines to the log
+      - name: Coverage Report
+        run: pytest --cov=. --cov-report=term-missing tests/
+      # If any test fails, the pipeline reports failure and the team is notified
